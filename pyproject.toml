@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "gwdc"
+name = "gwdc-python"
 version = "0.1.0"
 description = "API for GWDC modules"
 authors = ["Thomas Reichardt <treichardt@swin.edu.au>"]
