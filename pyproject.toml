@@ -12,6 +12,9 @@ jwt = "^1.2.0"
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 requests-mock = "^1.8.0"
+pyflakes = "^2.3.1"
+flake8 = "^3.9.2"
+coverage = "^5.5"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

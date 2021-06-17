@@ -1,9 +1,11 @@
 import requests
 import json
-import jwt
 from .utils import split_variables_dict
+from .exceptions import GWDCRequestException, handle_request_errors
 
 AUTH_ENDPOINT = 'https://gwcloud.org.au/auth/graphql'
+# AUTH_ENDPOINT = 'http://localhost:8000/graphql'
+
 
 class GWDC:
     def __init__(self, token, endpoint):
@@ -12,45 +14,47 @@ class GWDC:
         self._obtain_access_token()
 
     def _request(self, endpoint, query, variables=None, headers=None, method="POST"):
-        request = requests.request(
-            method=method,
-            url=endpoint,
-            json={
+        variables, files, files_map = split_variables_dict(variables)
+        if files:
+            operations = {
                 "query": query,
-                "variables": variables
-            },
-            headers=headers
-        )
-        content = json.loads(request.content)
-        return content.get('data', None), content.get('errors', None)
+                "variables": variables,
+                "operationName": query.replace('(', ' ').split()[1]  # Hack for getting mutation name from query string
+            }
 
-    def _file_upload_request(self, endpoint, query, variables=None, files=None, files_map=None, headers=None, method="POST"):
-
-        operations = {
-            "query": query,
-            "variables": variables,
-            "operationName": query.replace('(', ' ').split()[1] # Hack for getting mutation name from query string
-        }
-        
-        data = {
-            "operations": json.dumps(operations),
-            "map": json.dumps(files_map),
-            **files
-        }
+            request_params = {
+                "data": {
+                    "operations": json.dumps(operations),
+                    "map": json.dumps(files_map),
+                    **files
+                },
+                "files": files
+            }
+        else:
+            request_params = {
+                "json": {
+                    "query": query,
+                    "variables": variables
+                }
+            }
 
         request = requests.request(
             method=method,
             url=endpoint,
-            data=data,
             headers=headers,
-            files=files
+            **request_params
         )
 
         content = json.loads(request.content)
-        return content.get('data', None), content.get('errors', None)
+        errors = content.get('errors', None)
+        if not errors:
+            return content.get('data', None)
+        else:
+            raise GWDCRequestException(gwdc=self, msg=errors[0].get('message'))
 
+    @handle_request_errors
     def _obtain_access_token(self):
-        data, errors = self._request(
+        data = self._request(
             endpoint=AUTH_ENDPOINT,
             query="""
                 query ($token: String!){
@@ -65,9 +69,9 @@ class GWDC:
         self.jwt_token = data["jwtToken"]["jwtToken"]
         self.refresh_token = data["jwtToken"]["refreshToken"]
 
-
+    @handle_request_errors
     def _refresh_access_token(self):
-        data, errors = self._request(
+        data = self._request(
             endpoint=AUTH_ENDPOINT,
             query="""
                 mutation RefreshToken ($refreshToken: String!){
@@ -83,25 +87,11 @@ class GWDC:
         self.jwt_token = data["refreshToken"]["token"]
         self.refresh_token = data["refreshToken"]["refreshToken"]
 
-
+    @handle_request_errors
     def request(self, query, variables=None, headers=None):
-        variables, files, files_map = split_variables_dict(variables)
 
         all_headers = {'Authorization': 'JWT ' + self.jwt_token}
         if headers is not None:
             all_headers = {**all_headers, **headers} 
-        
-        if files:
-            data, errors = self._file_upload_request(endpoint=self.endpoint, query=query, variables=variables, files=files, files_map=files_map, headers=all_headers)
-        else:
-            data, errors = self._request(endpoint=self.endpoint, query=query, variables=variables, headers=all_headers)
 
-        if not errors:
-            return data, errors
-        else:
-            error = errors[0].get('message')
-            if error == 'Signature has expired':
-                self._refresh_access_token()
-                return self.request(query, variables, headers)
-            else:
-                raise Exception(error)
+        return self._request(endpoint=self.endpoint, query=query, variables=variables, headers=all_headers)
