@@ -4,7 +4,6 @@ from .utils import split_variables_dict
 from .exceptions import GWDCRequestException, handle_request_errors
 
 AUTH_ENDPOINT = 'https://gwcloud.org.au/auth/graphql'
-# AUTH_ENDPOINT = 'http://localhost:8000/graphql'
 
 
 class GWDC:
