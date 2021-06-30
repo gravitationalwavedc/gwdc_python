@@ -1,7 +1,10 @@
 import io
+import os
+
 
 def split_variables_dict(variables):
-    """Recursively travel through a dict, replacing any instances of a file-like object with None and moving the file-like objects to a separate dict
+    """Recursively travel through a dict, replacing any instances of a file-like object with None and moving the
+    file-like objects to a separate dict
 
     Parameters
     ----------
@@ -20,6 +23,7 @@ def split_variables_dict(variables):
     
     files = {}
     files_map = {}
+
     def extract_files(path, obj):
         nonlocal files, files_map
         if type(obj) is list:
@@ -35,7 +39,7 @@ def split_variables_dict(variables):
                 nulled_obj[key] = value
             return nulled_obj
         elif isinstance(obj, io.IOBase):
-            files[path] = ("null", obj)
+            files[path] = (os.path.basename(obj.name), obj)
             files_map[path] = [path]
             return None
         else:

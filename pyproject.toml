@@ -12,6 +12,8 @@ include = ["LICENSE",]
 python = "^3.7"
 requests = "^2.25.1"
 jwt = "^1.2.0"
+requests-toolbelt = "^0.9.1"
+tqdm = "^4.61.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
