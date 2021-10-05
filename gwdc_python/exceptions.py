@@ -18,7 +18,16 @@ class AuthenticationError(Exception):
     raise_msg = 'APIToken matching query does not exist.'
 
     def __init__(self):
-        super().__init__('Your API token does not exist, check that it is correct or try recreating it!')
+        super().__init__(
+            """
+Your API token does not exist, make sure it is correct!
+
+Please read the API token documentation:
+https://gwcloud-python.readthedocs.io/en/latest/gettingstarted.html#api-token
+
+Alternatively, head straight to https://gwcloud.org.au/auth/api-token to create one.
+            """
+        )
 
 
 def handle_request_errors(func):
