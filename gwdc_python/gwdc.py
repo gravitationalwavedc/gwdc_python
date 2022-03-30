@@ -7,8 +7,7 @@ from tqdm import tqdm
 from .exceptions import GWDCRequestException, handle_request_errors
 from .utils import split_variables_dict
 
-AUTH_ENDPOINT = 'http://localhost:8000/graphql'
-# AUTH_ENDPOINT = 'https://gwcloud.org.au/auth/graphql'
+AUTH_ENDPOINT = 'https://gwcloud.org.au/auth/graphql'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -26,7 +25,7 @@ class GWDC:
 
     def _request(self, endpoint, query, variables=None, headers={}, method="POST"):
         variables, files, files_map = split_variables_dict(variables)
-        bar = None
+
         if files:
             operations = {
                 "query": query,
@@ -46,10 +45,10 @@ class GWDC:
             def update_progress(mon):
                 update_bytes = mon.bytes_read - bar.n
                 bar.update(update_bytes)
-                
+
                 if not update_bytes:
                     bar.close()
-                    logger.info("File uploads are being processed remotely, please be patient. This may take a while...")
+                    logger.info("Files are being processed remotely, please be patient. This may take a while...")
 
             m = MultipartEncoderMonitor(e, update_progress)
 
