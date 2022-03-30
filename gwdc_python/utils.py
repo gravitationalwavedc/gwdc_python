@@ -19,8 +19,8 @@ def split_variables_dict(variables):
         Dictionary containing the file-like objects with keys based on the paths in the variables dict
     dict
         Dictionary with keys and values corresponding to the paths of the file-like objects in the variables dict.
-    """    
-    
+    """
+
     files = {}
     files_map = {}
 
