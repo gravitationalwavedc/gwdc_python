@@ -25,7 +25,7 @@ class GWDC:
 
     def _request(self, endpoint, query, variables=None, headers={}, method="POST"):
         variables, files, files_map = split_variables_dict(variables)
-        bar = None
+
         if files:
             operations = {
                 "query": query,
@@ -42,16 +42,13 @@ class GWDC:
             encoder_len = e.len
             bar = tqdm(total=encoder_len, leave=True, unit='B', unit_scale=True)
 
-            last_progress = 0
-
             def update_progress(mon):
-                nonlocal last_progress
-                s = mon.bytes_read - last_progress
-                last_progress = mon.bytes_read
-                bar.update(s)
+                update_bytes = mon.bytes_read - bar.n
+                bar.update(update_bytes)
 
-                if mon.bytes_read == encoder_len:
-                    logger.info("Job upload is being processed remotely, please be patient. This may take a while...")
+                if not update_bytes:
+                    bar.close()
+                    logger.info("Files are being processed remotely, please be patient. This may take a while...")
 
             m = MultipartEncoderMonitor(e, update_progress)
 
@@ -74,9 +71,6 @@ class GWDC:
             headers=headers,
             **request_params
         )
-
-        if bar:
-            bar.close()
 
         content = json.loads(request.content)
         errors = content.get('errors', None)
