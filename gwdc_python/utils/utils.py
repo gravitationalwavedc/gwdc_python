@@ -48,3 +48,22 @@ def split_variables_dict(variables):
     nulled_variables = extract_files("variables", variables)
 
     return nulled_variables, files, files_map
+
+
+def remove_path_anchor(path):
+    """Removes the path anchor, making it a relative path
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Path from which to strip anchor
+
+    Returns
+    -------
+    Path
+        Relative path
+    """
+    if path.is_absolute():
+        return path.relative_to(path.anchor)
+    else:
+        return path
