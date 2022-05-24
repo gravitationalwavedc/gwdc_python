@@ -27,7 +27,7 @@ class FileReferenceList(TypedList):
     def batched(self):
         _batched = {}
         for ref in self.data:
-            refs = _batched.get(ref.job_id, [])
+            refs = _batched.get(ref.job_id, FileReferenceList())
             refs.append(ref)
             _batched[ref.job_id] = refs
         return _batched
