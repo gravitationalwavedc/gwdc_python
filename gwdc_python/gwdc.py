@@ -3,6 +3,7 @@ import logging
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncoderMonitor
 from tqdm import tqdm
+from humps import camelize, decamelize
 
 from .exceptions import GWDCRequestException, handle_request_errors
 from .utils import split_variables_dict
@@ -24,6 +25,7 @@ class GWDC:
         self._obtain_access_token()
 
     def _request(self, endpoint, query, variables=None, headers={}, method="POST"):
+        variables = camelize(variables)
         variables, files, files_map = split_variables_dict(variables)
 
         if files:
@@ -75,7 +77,7 @@ class GWDC:
         content = json.loads(request.content)
         errors = content.get('errors', None)
         if not errors:
-            return content.get('data', None)
+            return decamelize(content.get('data', None))
         else:
             raise GWDCRequestException(gwdc=self, msg=errors[0].get('message'))
 
@@ -93,8 +95,8 @@ class GWDC:
             """,
             variables={"token": self.api_token}
         )
-        self.jwt_token = data["jwtToken"]["jwtToken"]
-        self.refresh_token = data["jwtToken"]["refreshToken"]
+        self.jwt_token = data["jwt_token"]["jwt_token"]
+        self.refresh_token = data["jwt_token"]["refresh_token"]
 
     @handle_request_errors
     def _refresh_access_token(self):
@@ -108,11 +110,10 @@ class GWDC:
                     }
                 }
             """,
-            variables={"refreshToken": self.refresh_token}
+            variables={"refresh_token": self.refresh_token}
         )
-
-        self.jwt_token = data["refreshToken"]["token"]
-        self.refresh_token = data["refreshToken"]["refreshToken"]
+        self.jwt_token = data["refresh_token"]["token"]
+        self.refresh_token = data["refresh_token"]["refresh_token"]
 
     @handle_request_errors
     def request(self, query, variables=None, headers=None, authorize=True):

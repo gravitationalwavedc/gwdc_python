@@ -277,6 +277,14 @@ optional = true
 python-versions = ">=3.6"
 
 [[package]]
+name = "pyhumps"
+version = "3.7.1"
+description = "🐫  Convert strings (and dictionary keys) between snake case, camel case and pascal case in Python. Inspired by Humps for Node"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "pyparsing"
 version = "3.0.9"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
@@ -599,7 +607,7 @@ docs = ["Sphinx", "sphinx-rtd-theme"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "bdff5dba8a33a9c51e6755a3904f5740deb2fee101ce8bb232721550f23e4b22"
+content-hash = "1f925467c85c647a73d357337c1c41efc24dec0c722c92ddeaa5fd1d7e6d1f61"
 
 [metadata.files]
 alabaster = [
@@ -864,6 +872,10 @@ pyflakes = [
 pygments = [
     {file = "Pygments-2.12.0-py3-none-any.whl", hash = "sha256:dc9c10fb40944260f6ed4c688ece0cd2048414940f1cea51b8b226318411c519"},
     {file = "Pygments-2.12.0.tar.gz", hash = "sha256:5eb116118f9612ff1ee89ac96437bb6b49e8f04d8a13b514ba26f620208e26eb"},
+]
+pyhumps = [
+    {file = "pyhumps-3.7.1-py3-none-any.whl", hash = "sha256:c6f2d833f2c7afae039d71b7dc0aba5412ae5b8c8c33d4a208c1d412de17229e"},
+    {file = "pyhumps-3.7.1.tar.gz", hash = "sha256:5616f0afdbc73ef479fa9999f4abdcb336a0232707ff1a0b86e29fc9339e18da"},
 ]
 pyparsing = [
     {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},

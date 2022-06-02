@@ -101,4 +101,4 @@ def test_gwdc_request(setup_gwdc):
     )
     assert gwdc.jwt_token == "mock_jwt_token_new"
     assert gwdc.refresh_token == "mock_refresh_token_new"
-    assert response["testResponse"] == "mock_response"
+    assert response["test_response"] == "mock_response"
