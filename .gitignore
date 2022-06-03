@@ -52,3 +52,6 @@ docs/_build/
 # pytest-cov reports
 coverage.xml
 junit.xml
+
+# jetbrains
+.idea/
