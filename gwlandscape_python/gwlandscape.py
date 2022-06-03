@@ -31,4 +31,3 @@ class GWLandscape:
     def __init__(self, token, endpoint=GWLANDSCAPE_ENDPOINT):
         self.client = GWDC(token=token, endpoint=endpoint)
         self.request = self.client.request  # Setting shorthand for simplicity
-
