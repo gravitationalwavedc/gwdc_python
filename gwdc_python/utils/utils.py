@@ -67,3 +67,26 @@ def remove_path_anchor(path):
         return path.relative_to(path.anchor)
     else:
         return path
+
+
+def rename_dict_keys(input_obj, key_map):
+    """Renames the keys in a dictionary
+
+    Parameters
+    ----------
+    input_obj : dict or list
+        Object within which to recursively substitute dictionary keys
+    key_map : dict
+        Dictionary which specifies old keys to be swapped with new keys in the input_obj, e.g `{'old_key': 'new_key'}`
+
+    Returns
+    -------
+    dict or list
+        Copy of `input_obj` with old keys subbed for new keys
+    """
+    if isinstance(input_obj, dict):  # if dict, apply to each key
+        return {key_map.get(k, k): rename_dict_keys(v, key_map) for k, v in input_obj.items()}
+    elif isinstance(input_obj, list):  # if list, apply to each element
+        return [rename_dict_keys(elem, key_map) for elem in input_obj]
+    else:
+        return input_obj
