@@ -1,5 +1,4 @@
 import json
-import logging
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncoderMonitor
 from tqdm import tqdm
@@ -7,15 +6,11 @@ from humps import camelize, decamelize
 
 from .exceptions import GWDCRequestException, handle_request_errors
 from .utils import split_variables_dict
+from .logger import create_logger
 
 AUTH_ENDPOINT = 'https://gwcloud.org.au/auth/graphql'
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-logger.addHandler(ch)
+logger = create_logger(__name__)
 
 
 class GWDC:
