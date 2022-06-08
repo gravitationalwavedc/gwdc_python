@@ -11,6 +11,9 @@ Welcome to gwdc_python's documentation!
    :caption: Contents:
 
    filereference
+   jobclasses
+   helpers
+   utils
 
 
 Indices and tables

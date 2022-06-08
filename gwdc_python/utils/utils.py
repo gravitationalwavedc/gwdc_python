@@ -55,7 +55,7 @@ def remove_path_anchor(path):
 
     Parameters
     ----------
-    path : pathlib.Path
+    path : ~pathlib.Path
         Path from which to strip anchor
 
     Returns

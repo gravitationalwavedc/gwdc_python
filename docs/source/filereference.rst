@@ -2,7 +2,7 @@ FileReference class
 ===================
 
 FileReference objects are used to bundle together the file path, size and download token of a specific job file.
-They are typically automatically created and placed in a FileReferenceList by methods of the :class:`~gwdc_python.files.file_reference.BilbyJob` class.
+They are typically automatically created and placed in a FileReferenceList by methods of job classes.
 
 
 .. autoclass:: gwdc_python.files.file_reference.FileReference
