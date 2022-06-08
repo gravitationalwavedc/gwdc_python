@@ -1,4 +1,6 @@
 class JobMeta(type):
+    """Metaclass for GWDC jobs, which is used to dynamically add methods based on job list filters
+    """
     def __new__(cls, classname, bases, attrs):
         new_class = super().__new__(cls, classname, bases, attrs)
         for name, func in attrs.get('FILE_LIST_FILTERS', {}).items():
@@ -8,9 +10,11 @@ class JobMeta(type):
     def register_file_list_filter(self, name, file_list_filter_fn):
         """Register a function used to filter the file list.
         This will create three methods on the class using this filter function:
+
         - get_{name}_file_list
         - get_{name}_files
         - save_{name}_files
+
         where {name} is the input name string.
 
         Parameters
@@ -32,7 +36,7 @@ class JobMeta(type):
 
             Returns
             -------
-            .FileReferenceList
+            ~gwdc_python.files._file_reference.FileReferenceList
                 Contains FileReference instances holding information on the {spaced_name} files
         """
 

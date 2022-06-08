@@ -3,7 +3,8 @@ from ..helpers import JobStatus
 
 
 class JobBase(metaclass=JobMeta):
-    """Base class from which GWDC jobs will inherit.
+    """Base class from which GWDC jobs will inherit. Provides a basic initialisation method,
+    an equality check, a neat string representation and a method with which to get the full file list.
     """
 
     def __init__(self, client, job_id, name, description, user, job_status):
