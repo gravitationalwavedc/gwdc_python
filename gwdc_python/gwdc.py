@@ -8,14 +8,13 @@ from .exceptions import GWDCRequestException, handle_request_errors
 from .utils import split_variables_dict
 from .logger import create_logger
 
-AUTH_ENDPOINT = 'https://gwcloud.org.au/auth/graphql'
-
 logger = create_logger(__name__)
 
 
 class GWDC:
-    def __init__(self, token, endpoint):
+    def __init__(self, token, auth_endpoint, endpoint):
         self.api_token = token
+        self.auth_endpoint = auth_endpoint
         self.endpoint = endpoint
         self._obtain_access_token()
 
@@ -79,7 +78,7 @@ class GWDC:
     @handle_request_errors
     def _obtain_access_token(self):
         data = self._request(
-            endpoint=AUTH_ENDPOINT,
+            endpoint=self.auth_endpoint,
             query="""
                 query ($token: String!){
                     jwtToken (token: $token) {
@@ -96,7 +95,7 @@ class GWDC:
     @handle_request_errors
     def _refresh_access_token(self):
         data = self._request(
-            endpoint=AUTH_ENDPOINT,
+            endpoint=self.auth_endpoint,
             query="""
                 mutation RefreshToken ($refreshToken: String!){
                     refreshToken (refreshToken: $refreshToken) {

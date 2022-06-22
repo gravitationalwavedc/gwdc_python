@@ -53,7 +53,11 @@ def setup_gwdc(requests_mock):
         response_list = [response() for response in responses]
         requests_mock.post('https://gwcloud.org.au/auth/graphql', auth_response_list)
         requests_mock.post('https://gwcloud.org.au/bilby/graphql', response_list)
-        return GWDC(token='mock_token', endpoint='https://gwcloud.org.au/bilby/graphql')
+        return GWDC(
+            token='mock_token',
+            auth_endpoint='https://gwcloud.org.au/auth/graphql',
+            endpoint='https://gwcloud.org.au/bilby/graphql'
+        )
     return _setup_gwdc
 
 
