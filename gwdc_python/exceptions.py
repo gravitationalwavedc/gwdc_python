@@ -14,20 +14,11 @@ class GWDCUnknownException(Exception):
         super().__init__(self.msg)
 
 
-class AuthenticationError(Exception):
+class GWDCAuthenticationError(Exception):
     raise_msg = 'APIToken matching query does not exist.'
 
     def __init__(self):
-        super().__init__(
-            """
-Your API token does not exist, make sure it is correct!
-
-Please read the API token documentation:
-https://gwcloud-python.readthedocs.io/en/latest/gettingstarted.html#api-token
-
-Alternatively, head straight to https://gwcloud.org.au/auth/api-token to create one.
-            """
-        )
+        super().__init__(self.__class__.raise_msg)
 
 
 def handle_request_errors(func):
@@ -40,7 +31,7 @@ def handle_request_errors(func):
                 exc.gwdc._refresh_access_token()
                 return func(*args, **kwargs)
 
-            for exception in (AuthenticationError,):
+            for exception in (GWDCAuthenticationError,):
                 if exc.msg == exception.raise_msg:
                     raise exception
             else:

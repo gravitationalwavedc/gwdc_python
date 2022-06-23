@@ -1,7 +1,7 @@
 import pytest
 import json
 from gwdc_python.gwdc import GWDC
-from gwdc_python.exceptions import AuthenticationError
+from gwdc_python.exceptions import GWDCAuthenticationError
 
 
 # Set up possible data responses from auth server
@@ -48,18 +48,23 @@ def access_token_expired():
 # Set up GWDC class with specified responses
 @pytest.fixture
 def setup_gwdc(requests_mock):
-    def _setup_gwdc(auth_responses=[], responses=[]):
+    def _setup_gwdc(auth_responses=[], responses=[], error_handler=None):
         auth_response_list = [response() for response in auth_responses]
         response_list = [response() for response in responses]
         requests_mock.post('https://gwcloud.org.au/auth/graphql', auth_response_list)
         requests_mock.post('https://gwcloud.org.au/bilby/graphql', response_list)
-        return GWDC(token='mock_token', endpoint='https://gwcloud.org.au/bilby/graphql')
+        return GWDC(
+            token='mock_token',
+            auth_endpoint='https://gwcloud.org.au/auth/graphql',
+            endpoint='https://gwcloud.org.au/bilby/graphql',
+            custom_error_handler=error_handler
+        )
     return _setup_gwdc
 
 
-# Test that GWDC will raise an AuthenticationError if the API Token cannot be found in the auth database
+# Test that GWDC will raise an GWDCAuthenticationError if the API Token cannot be found in the auth database
 def test_gwdc_api_token(setup_gwdc):
-    with pytest.raises(AuthenticationError):
+    with pytest.raises(GWDCAuthenticationError):
         setup_gwdc(
             auth_responses=[api_token_incorrect]
         )
@@ -102,3 +107,23 @@ def test_gwdc_request(setup_gwdc):
     assert gwdc.jwt_token == "mock_jwt_token_new"
     assert gwdc.refresh_token == "mock_refresh_token_new"
     assert response["test_response"] == "mock_response"
+
+
+# Test that GWDC will allow the custom error handler to intercept raised errors
+def test_gwdc_custom_error_handling_token(setup_gwdc):
+    class TestException(Exception):
+        pass
+
+    def custom_error_handler(f):
+        def wrapper(*args, **kwargs):
+            try:
+                f(*args, **kwargs)
+            except GWDCAuthenticationError:
+                raise TestException
+        return wrapper
+
+    with pytest.raises(TestException):
+        setup_gwdc(
+            auth_responses=[api_token_incorrect],
+            error_handler=custom_error_handler
+        )
