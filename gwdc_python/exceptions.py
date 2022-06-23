@@ -20,6 +20,7 @@ class GWDCAuthenticationError(Exception):
     def __init__(self):
         super().__init__(self.__class__.raise_msg)
 
+
 def handle_request_errors(func):
     @functools.wraps(func)
     def wrapper_handle_exceptions(*args, **kwargs):

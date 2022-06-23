@@ -110,7 +110,7 @@ def test_gwdc_request(setup_gwdc):
 
 
 # Test that GWDC will allow the custom error handler to intercept raised errors
-def test_gwdc_api_token(setup_gwdc):
+def test_gwdc_custom_error_handling_token(setup_gwdc):
     class TestException(Exception):
         pass
 
