@@ -12,11 +12,18 @@ logger = create_logger(__name__)
 
 
 class GWDC:
-    def __init__(self, token, auth_endpoint, endpoint):
+    def __init__(self, token, auth_endpoint, endpoint, custom_error_handler=None):
         self.api_token = token
         self.auth_endpoint = auth_endpoint
         self.endpoint = endpoint
+        if custom_error_handler:
+            self._apply_custom_error_handler(custom_error_handler)
         self._obtain_access_token()
+
+    def _apply_custom_error_handler(self, custom_error_handler):
+        self._obtain_access_token = custom_error_handler(self._obtain_access_token)
+        self._refresh_access_token = custom_error_handler(self._refresh_access_token)
+        self.request = custom_error_handler(self.request)
 
     def _request(self, endpoint, query, variables=None, headers={}, method="POST"):
         variables = camelize(variables)
