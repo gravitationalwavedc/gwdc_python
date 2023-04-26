@@ -48,7 +48,13 @@ def access_token_expired():
 # Set up GWDC class with specified responses
 @pytest.fixture
 def setup_gwdc(requests_mock):
-    def _setup_gwdc(auth_responses=[], responses=[], error_handler=None, token='mock_token'):
+    def _setup_gwdc(auth_responses=None, responses=None, error_handler=None, token='mock_token'):
+        if responses is None:
+            responses = []
+
+        if auth_responses is None:
+            auth_responses = []
+
         auth_response_list = [response() for response in auth_responses]
         response_list = [response() for response in responses]
         requests_mock.post('https://gwcloud.org.au/auth/graphql', auth_response_list)
