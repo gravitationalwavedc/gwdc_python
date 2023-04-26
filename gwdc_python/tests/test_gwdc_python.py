@@ -90,7 +90,7 @@ def test_gwdc_refresh(setup_gwdc):
 
 
 # Test that a token will be automatically refreshed if it has expired
-def test_gwdc_request(setup_gwdc):
+def test_gwdc_request(setup_gwdc, requests_mock):
     gwdc = setup_gwdc(
         auth_responses=[access_token_response, refresh_token_response],
         responses=[access_token_expired, request_test_response]
@@ -107,6 +107,9 @@ def test_gwdc_request(setup_gwdc):
     assert gwdc.jwt_token == "mock_jwt_token_new"
     assert gwdc.refresh_token == "mock_refresh_token_new"
     assert response["test_response"] == "mock_response"
+
+    # Authorization should have been provided in the headers
+    assert "Authorization" not in requests_mock.request_history[0].headers
 
 
 # Test that GWDC will allow the custom error handler to intercept raised errors
@@ -130,22 +133,25 @@ def test_gwdc_custom_error_handling_token(setup_gwdc):
 
 
 # Test that creating an instance without a token works
-def test_gwdc_no_token(setup_gwdc):
+def test_gwdc_no_token(setup_gwdc, requests_mock):
     try:
         setup_gwdc(
             auth_responses=[],
             responses=[],
-            token=None
+            token=""
         )
     except Exception as _:
         pytest.fail("Unexpected error when creating GWDC without a token")
 
+    assert requests_mock.call_count == 0
 
-def test_gwdc_request_no_token(setup_gwdc):
+
+# Test that requests still work correctly without providing a token
+def test_gwdc_request_no_token(setup_gwdc, requests_mock):
     gwdc = setup_gwdc(
         auth_responses=[],
         responses=[request_test_response],
-        token=None
+        token=""
     )
 
     response = gwdc.request(
@@ -157,3 +163,6 @@ def test_gwdc_request_no_token(setup_gwdc):
     )
 
     assert response["test_response"] == "mock_response"
+
+    # Authorization should not have been provided in the headers
+    assert "Authorization" not in requests_mock.request_history[0].headers
