@@ -18,7 +18,9 @@ class GWDC:
         self.endpoint = endpoint
         if custom_error_handler:
             self._apply_custom_error_handler(custom_error_handler)
-        self._obtain_access_token()
+
+        if self.api_token:
+            self._obtain_access_token()
 
     def _apply_custom_error_handler(self, custom_error_handler):
         self._obtain_access_token = custom_error_handler(self._obtain_access_token)
@@ -119,7 +121,7 @@ class GWDC:
     @handle_request_errors
     def request(self, query, variables=None, headers=None, authorize=True):
 
-        all_headers = {'Authorization': 'JWT ' + self.jwt_token} if authorize else {}
+        all_headers = {'Authorization': 'JWT ' + self.jwt_token} if authorize and self.api_token else {}
         if headers is not None:
             all_headers = {**all_headers, **headers}
 

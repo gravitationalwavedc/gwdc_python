@@ -48,13 +48,13 @@ def access_token_expired():
 # Set up GWDC class with specified responses
 @pytest.fixture
 def setup_gwdc(requests_mock):
-    def _setup_gwdc(auth_responses=[], responses=[], error_handler=None):
+    def _setup_gwdc(auth_responses=[], responses=[], error_handler=None, token='mock_token'):
         auth_response_list = [response() for response in auth_responses]
         response_list = [response() for response in responses]
         requests_mock.post('https://gwcloud.org.au/auth/graphql', auth_response_list)
         requests_mock.post('https://gwcloud.org.au/bilby/graphql', response_list)
         return GWDC(
-            token='mock_token',
+            token=token,
             auth_endpoint='https://gwcloud.org.au/auth/graphql',
             endpoint='https://gwcloud.org.au/bilby/graphql',
             custom_error_handler=error_handler
@@ -127,3 +127,33 @@ def test_gwdc_custom_error_handling_token(setup_gwdc):
             auth_responses=[api_token_incorrect],
             error_handler=custom_error_handler
         )
+
+
+# Test that creating an instance without a token works
+def test_gwdc_no_token(setup_gwdc):
+    try:
+        setup_gwdc(
+            auth_responses=[],
+            responses=[],
+            token=None
+        )
+    except Exception as _:
+        pytest.fail("Unexpected error when creating GWDC without a token")
+
+
+def test_gwdc_request_no_token(setup_gwdc):
+    gwdc = setup_gwdc(
+        auth_responses=[],
+        responses=[request_test_response],
+        token=None
+    )
+
+    response = gwdc.request(
+        query="""
+            query {
+                testResponse
+            }
+        """
+    )
+
+    assert response["test_response"] == "mock_response"
