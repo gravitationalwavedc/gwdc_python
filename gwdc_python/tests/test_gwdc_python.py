@@ -109,7 +109,7 @@ def test_gwdc_request(setup_gwdc, requests_mock):
     assert response["test_response"] == "mock_response"
 
     # Authorization should have been provided in the headers
-    assert "Authorization" not in requests_mock.request_history[0].headers
+    assert "Authorization" in requests_mock.request_history[-1].headers
 
 
 # Test that GWDC will allow the custom error handler to intercept raised errors
