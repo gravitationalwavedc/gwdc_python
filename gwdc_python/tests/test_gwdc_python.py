@@ -146,7 +146,7 @@ def test_gwdc_no_token(setup_gwdc, requests_mock):
             responses=[],
             token=""
         )
-    except Exception as _:
+    except json.decoder.JSONDecodeError:
         pytest.fail("Unexpected error when creating GWDC without a token")
 
     assert requests_mock.call_count == 0
