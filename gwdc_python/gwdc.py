@@ -28,6 +28,10 @@ class GWDC:
             self._obtain_access_token()
         else:
             self.public_id = self._obtain_public_id()
+            self.session_id = self._obtain_session_id()
+
+    def _obtain_session_id(self):
+        return str(uuid4())
 
     def _obtain_public_id(self):
         config_file = Path(user_config_dir(APP_NAME, ORGANISATION)) / 'config.json'
@@ -158,7 +162,7 @@ class GWDC:
             if self.api_token:
                 all_headers = {'Authorization': 'JWT ' + self.jwt_token}
             elif self.public_id:
-                all_headers = {'X-Correlation-ID': self.public_id}
+                all_headers = {'X-Correlation-ID': f"{self.public_id} {self.session_id}"}
 
             if headers is not None:
                 all_headers = {**all_headers, **headers}
