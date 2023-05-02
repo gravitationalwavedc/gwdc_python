@@ -1,12 +1,17 @@
 import json
+from pathlib import Path
+from uuid import uuid4
+
 import requests
+from appdirs import user_config_dir
+from humps import camelize, decamelize
 from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncoderMonitor
 from tqdm import tqdm
-from humps import camelize, decamelize
 
+from .constants import APP_NAME, ORGANISATION
 from .exceptions import GWDCRequestException, handle_request_errors
-from .utils import split_variables_dict
 from .logger import create_logger
+from .utils import split_variables_dict
 
 logger = create_logger(__name__)
 
@@ -21,6 +26,34 @@ class GWDC:
 
         if self.api_token:
             self._obtain_access_token()
+        else:
+            self.public_id = self._obtain_public_id()
+            self.session_id = self._obtain_session_id()
+
+    def _obtain_session_id(self):
+        return str(uuid4())
+
+    def _obtain_public_id(self):
+        config_file = Path(user_config_dir(APP_NAME, ORGANISATION)) / 'config.json'
+
+        def write_new_config():
+            uuid = str(uuid4())
+
+            config = {
+                'public_id': uuid
+            }
+
+            config_file.parent.mkdir(parents=True, exist_ok=True)
+            config_file.write_text(json.dumps(config))
+
+        if not config_file.exists():
+            write_new_config()
+
+        try:
+            return json.loads(config_file.read_text())['public_id']
+        except Exception:
+            write_new_config()
+            return json.loads(config_file.read_text())['public_id']
 
     def _apply_custom_error_handler(self, custom_error_handler):
         self._obtain_access_token = custom_error_handler(self._obtain_access_token)
@@ -124,7 +157,13 @@ class GWDC:
     @handle_request_errors
     def request(self, query, variables=None, headers=None, authorize=True):
 
-        all_headers = {'Authorization': 'JWT ' + self.jwt_token} if authorize and self.api_token else {}
+        all_headers = {}
+        if authorize:
+            if self.api_token:
+                all_headers = {'Authorization': 'JWT ' + self.jwt_token}
+            elif self.public_id:
+                all_headers = {'X-Correlation-ID': f"{self.public_id} {self.session_id}"}
+
         if headers is not None:
             all_headers = {**all_headers, **headers}
 
