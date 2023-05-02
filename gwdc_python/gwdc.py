@@ -164,7 +164,7 @@ class GWDC:
             elif self.public_id:
                 all_headers = {'X-Correlation-ID': f"{self.public_id} {self.session_id}"}
 
-            if headers is not None:
-                all_headers = {**all_headers, **headers}
+        if headers is not None:
+            all_headers = {**all_headers, **headers}
 
         return self._request(endpoint=self.endpoint, query=query, variables=variables, headers=all_headers)
