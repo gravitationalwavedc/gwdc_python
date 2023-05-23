@@ -14,7 +14,7 @@ class JobBase(metaclass=JobMeta):
         self.description = description
         self.user = user
         self.status = JobStatus(status=job_status['name'], date=job_status['date'])
-        self.is_uploaded_job = None
+        self.job_type = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}(name={self.name}, job_id={self.job_id})"
@@ -36,5 +36,5 @@ class JobBase(metaclass=JobMeta):
         ~gwdc_python.files.file_reference.FileReferenceList
             Contains FileReference instances for each of the files associated with this job
         """
-        result, self.is_uploaded_job = self.client._get_files_by_job_id(self.job_id)
+        result, self.job_type = self.client._get_files_by_job_id(self.job_id)
         return result
