@@ -1,6 +1,8 @@
+import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 from . import filters
+from .constants import JobType
 from ..utils import remove_path_anchor, TypedList
 
 
@@ -8,14 +10,17 @@ from ..utils import remove_path_anchor, TypedList
 class FileReference:
     """Object used to facilitate simpler downloading of files.
     """
+
     path: str
     file_size: int = field(repr=False)
     download_token: str = field(repr=False)
     job_id: int = field(repr=False)
-    uploaded: bool = field(repr=False, default=False)
+    job_type: int = field(repr=False, default=JobType.NORMAL_JOB)
 
     def __post_init__(self):
-        self.path = remove_path_anchor(Path(self.path))
+        if self.job_type != JobType.GWOSC_JOB:
+            self.path = remove_path_anchor(Path(self.path))
+
         self.file_size = int(self.file_size)
 
 
@@ -100,15 +105,15 @@ class FileReferenceList(TypedList):
         """
         return [ref.path for ref in self.data]
 
-    def get_uploaded(self):
-        """Get whether the files are from an uploaded job in a list
+    def get_job_type(self):
+        """Get the job type for each job in a list
 
         Returns
         -------
         list
-            List of True for uploaded jobs, False for submitted jobs
+            List of JobType for jobs
         """
-        return [ref.uploaded for ref in self.data]
+        return [ref.job_type for ref in self.data]
 
     def get_output_paths(self, root_path, preserve_directory_structure=True):
         """Get all the file paths modified to give them a base directory.
@@ -128,8 +133,13 @@ class FileReferenceList(TypedList):
         """
         paths = []
         for ref in self.data:
+            path = ref.path
+            if ref.job_type == JobType.GWOSC_JOB:
+                parsed = urllib.parse.urlparse(ref.path)
+                path = remove_path_anchor(Path(parsed.path.rsplit('/', 1).pop()))
+
             if preserve_directory_structure:
-                paths.append(root_path / ref.path)
+                paths.append(root_path / path)
             else:
-                paths.append(root_path / Path(ref.path.name))
+                paths.append(root_path / Path(path.name))
         return paths
