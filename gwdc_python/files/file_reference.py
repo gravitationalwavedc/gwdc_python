@@ -133,13 +133,16 @@ class FileReferenceList(TypedList):
         """
         paths = []
         for ref in self.data:
-            path = ref.path
             if ref.job_type == JobType.GWOSC_JOB:
-                parsed = urllib.parse.urlparse(ref.path)
-                path = remove_path_anchor(Path(parsed.path.rsplit('/', 1).pop()))
+                path = urllib.parse.urlparse(ref.path).path
+                path = Path(path.rsplit('/', 1).pop())
+                path = remove_path_anchor(path)
+            else:
+                path = ref.path
 
             if preserve_directory_structure:
                 paths.append(root_path / path)
             else:
                 paths.append(root_path / Path(path.name))
+
         return paths
