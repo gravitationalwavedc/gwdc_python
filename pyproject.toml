@@ -19,6 +19,7 @@ Sphinx = {version = "^4.0.2", optional = true}
 sphinx-rtd-theme = {version = "^0.5.2", optional = true}
 pyhumps = "^3.7.1"
 appdirs = "^1.4.4"
+urllib3 = "^1"
 
 [tool.poetry.extras]
 docs = ["Sphinx", "sphinx-rtd-theme"]
