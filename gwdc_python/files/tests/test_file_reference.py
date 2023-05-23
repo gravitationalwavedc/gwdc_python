@@ -96,8 +96,7 @@ def test_file_reference_list(setup_dicts):
     assert file_reference_list.get_total_bytes() == sum([ref.file_size for ref in file_references])
     assert file_reference_list.get_tokens() == [ref.download_token for ref in file_references]
     assert file_reference_list.get_paths() == [ref.path for ref in file_references]
-    assert file_reference_list.get_uploaded() == [ref.job_type == JobType.UPLOADED_JOB for ref in file_references]
-    assert file_reference_list.get_gwosc() == [ref.job_type == JobType.GWOSC_JOB for ref in file_references]
+    assert file_reference_list.get_job_type() == [ref.job_type for ref in file_references]
 
 
 def test_file_reference_list_types(setup_dicts):
