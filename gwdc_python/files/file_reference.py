@@ -1,4 +1,3 @@
-import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 from . import filters
