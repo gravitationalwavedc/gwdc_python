@@ -1,4 +1,3 @@
-import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 from . import filters
@@ -18,10 +17,9 @@ class FileReference:
     job_type: int = field(repr=False, default=JobType.NORMAL_JOB)
 
     def __post_init__(self):
-        if self.job_type != JobType.GWOSC_JOB:
+        if self.job_type != JobType.EXTERNAL_JOB:
             self.path = remove_path_anchor(Path(self.path))
-
-        self.file_size = int(self.file_size)
+            self.file_size = int(self.file_size)
 
 
 class FileReferenceList(TypedList):
@@ -81,7 +79,8 @@ class FileReferenceList(TypedList):
         """
         total_bytes = 0
         for ref in self.data:
-            total_bytes += ref.file_size
+            if ref.file_size is not None:
+                total_bytes += ref.file_size
 
         return total_bytes
 
@@ -133,10 +132,9 @@ class FileReferenceList(TypedList):
         """
         paths = []
         for ref in self.data:
-            if ref.job_type == JobType.GWOSC_JOB:
-                path = urllib.parse.urlparse(ref.path).path
-                path = Path(path.rsplit('/', 1).pop())
-                path = remove_path_anchor(path)
+            if ref.job_type == JobType.EXTERNAL_JOB:
+                # Ignored for external jobs
+                continue
             else:
                 path = ref.path
 
