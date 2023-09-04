@@ -54,17 +54,10 @@ def setup_dicts():
         },
         {
             'path': 'https://myurl.com/test/file1.h5',
-            'file_size': '1',
-            'download_token': 'test_token_8',
+            'file_size': None,
+            'download_token': None,
             'job_id': 'id4',
-            'job_type': JobType.GWOSC_JOB
-        },
-        {
-            'path': 'https://anotherurl.net/test/whatever/file2.h5?download=1',
-            'file_size': '1',
-            'download_token': 'test_token_9',
-            'job_id': 'id4',
-            'job_type': JobType.GWOSC_JOB
+            'job_type': JobType.EXTERNAL_JOB
         },
     ]
 
@@ -72,11 +65,12 @@ def setup_dicts():
 def test_file_reference(setup_dicts):
     for file_dict in setup_dicts:
         ref = FileReference(**file_dict)
-        if ref.job_type == JobType.GWOSC_JOB:
+        if ref.job_type == JobType.EXTERNAL_JOB:
             assert ref.path == file_dict['path']
+            assert ref.file_size is None
         else:
             assert ref.path == remove_path_anchor(Path(file_dict['path']))
-        assert ref.file_size == int(file_dict['file_size'])
+            assert ref.file_size == int(file_dict['file_size'])
         assert ref.download_token == file_dict['download_token']
         assert ref.job_id == file_dict['job_id']
         assert ref.job_type == file_dict['job_type']
@@ -93,7 +87,8 @@ def test_file_reference_list(setup_dicts):
         assert ref.job_id == file_references[i].job_id
         assert ref.job_type == file_references[i].job_type
 
-    assert file_reference_list.get_total_bytes() == sum([ref.file_size for ref in file_references])
+    assert (file_reference_list.get_total_bytes() ==
+            sum([ref.file_size for ref in file_references if ref.file_size is not None]))
     assert file_reference_list.get_tokens() == [ref.download_token for ref in file_references]
     assert file_reference_list.get_paths() == [ref.path for ref in file_references]
     assert file_reference_list.get_job_type() == [ref.job_type for ref in file_references]
@@ -135,9 +130,7 @@ def test_file_reference_list_output_paths(setup_dicts):
         root_path / 'result/dir/test1.txt',
         root_path / 'result/dir/test2.txt',
         root_path / 'test1.json',
-        root_path / 'test2.json',
-        root_path / 'file1.h5',
-        root_path / 'file2.h5'
+        root_path / 'test2.json'
     ]
     output_paths_flat = [
         root_path / 'test1.png',
@@ -145,9 +138,7 @@ def test_file_reference_list_output_paths(setup_dicts):
         root_path / 'test1.txt',
         root_path / 'test2.txt',
         root_path / 'test1.json',
-        root_path / 'test2.json',
-        root_path / 'file1.h5',
-        root_path / 'file2.h5'
+        root_path / 'test2.json'
     ]
     assert output_paths == file_reference_list.get_output_paths(root_path)
     assert output_paths_flat == file_reference_list.get_output_paths(root_path, preserve_directory_structure=False)
