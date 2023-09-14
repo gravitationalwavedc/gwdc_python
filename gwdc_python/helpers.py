@@ -11,11 +11,11 @@ class JobStatus:
 
 class TimeRange(Enum):
     """Enum to help with the time range field in the public job search."""
-    ANY = "Any time"
-    DAY = "Past 24 hours"
-    WEEK = "Past week"
-    MONTH = "Past month"
-    YEAR = "Past year"
+    ANY = "all"
+    DAY = "1d"
+    WEEK = "1w"
+    MONTH = "1m"
+    YEAR = "1y"
 
 
 class Cluster(Enum):
