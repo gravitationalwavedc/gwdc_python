@@ -1,5 +1,5 @@
-class JobMeta(type):
-    """Metaclass for GWDC jobs, which is used to dynamically add methods based on job list filters
+class GWDCObjectMeta(type):
+    """Metaclass for GWDC objects, which is used to dynamically add methods based on file list filters
     """
     def __new__(cls, classname, bases, attrs):
         new_class = super().__new__(cls, classname, bases, attrs)
@@ -32,13 +32,15 @@ class JobMeta(type):
 
         file_list_fn_name = f'get_{name}_file_list'
         file_list_fn = _get_file_list_subset
-        file_list_fn.__doc__ = f"""Get information for the {spaced_name} files associated with this job
+        file_list_fn.__doc__ = (
+            f"""Get information for the {spaced_name} files associated with this {self.__class__.__name__}
 
             Returns
             -------
             ~gwdc_python.files._file_reference.FileReferenceList
                 Contains FileReference instances holding information on the {spaced_name} files
-        """
+            """
+        )
 
         setattr(self, file_list_fn_name, file_list_fn)
 

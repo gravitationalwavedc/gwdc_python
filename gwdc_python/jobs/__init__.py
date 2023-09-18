@@ -1,1 +1,1 @@
-from .base import JobBase
+from .base import GWDCObjectBase

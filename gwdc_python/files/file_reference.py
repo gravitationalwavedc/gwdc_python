@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from . import filters
 from .constants import JobType
+from ..jobs import GWDCObjectBase
 from ..utils import remove_path_anchor, TypedList
 
 
@@ -13,11 +14,10 @@ class FileReference:
     path: str
     file_size: int = field(repr=False)
     download_token: str = field(repr=False)
-    job_id: int = field(repr=False)
-    job_type: int = field(repr=False, default=JobType.NORMAL_JOB)
+    parent: object = field(repr=False)
 
     def __post_init__(self):
-        if self.job_type != JobType.EXTERNAL_JOB:
+        if self.parent.type != JobType.EXTERNAL_JOB:
             self.path = remove_path_anchor(Path(self.path))
             self.file_size = int(self.file_size)
 
@@ -30,9 +30,9 @@ class FileReferenceList(TypedList):
     def batched(self):
         _batched = {}
         for ref in self.data:
-            refs = _batched.get(ref.job_id, FileReferenceList())
+            refs = _batched.get(ref.parent.id, FileReferenceList())
             refs.append(ref)
-            _batched[ref.job_id] = refs
+            _batched[ref.parent.id] = refs
         return _batched
 
     def filter_list(self, file_filter_fn, *args, **kwargs):
@@ -104,15 +104,15 @@ class FileReferenceList(TypedList):
         """
         return [ref.path for ref in self.data]
 
-    def get_job_type(self):
-        """Get the job type for each job in a list
+    def get_parent_type(self):
+        """Get the storage type for each parent in a list
 
         Returns
         -------
         list
             List of JobType for jobs
         """
-        return [ref.job_type for ref in self.data]
+        return [ref.parent.type for ref in self.data]
 
     def get_output_paths(self, root_path, preserve_directory_structure=True):
         """Get all the file paths modified to give them a base directory.
@@ -132,7 +132,7 @@ class FileReferenceList(TypedList):
         """
         paths = []
         for ref in self.data:
-            if ref.job_type == JobType.EXTERNAL_JOB:
+            if ref.parent.type == JobType.EXTERNAL_JOB:
                 # Ignored for external jobs
                 continue
             else:
