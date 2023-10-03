@@ -11,7 +11,7 @@ Welcome to gwdc_python's documentation!
    :caption: Contents:
 
    filereference
-   jobclasses
+   gwdcobjectclasses
    helpers
    utils
 

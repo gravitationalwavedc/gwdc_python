@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 from . import filters
-from .constants import JobType
-from ..jobs import GWDCObjectBase
+from ..objects.base import GWDCObjectBase
 from ..utils import remove_path_anchor, TypedList
 
 
@@ -14,10 +13,10 @@ class FileReference:
     path: str
     file_size: int = field(repr=False)
     download_token: str = field(repr=False)
-    parent: object = field(repr=False)
+    parent: GWDCObjectBase = field(repr=False)
 
     def __post_init__(self):
-        if self.parent.type != JobType.EXTERNAL_JOB:
+        if not self.parent.is_external():
             self.path = remove_path_anchor(Path(self.path))
             self.file_size = int(self.file_size)
 
@@ -110,7 +109,7 @@ class FileReferenceList(TypedList):
         Returns
         -------
         list
-            List of JobType for jobs
+            List of GWDCObjectType for each parent of the files in the list
         """
         return [ref.parent.type for ref in self.data]
 
@@ -132,15 +131,13 @@ class FileReferenceList(TypedList):
         """
         paths = []
         for ref in self.data:
-            if ref.parent.type == JobType.EXTERNAL_JOB:
-                # Ignored for external jobs
-                continue
+            path = ref.path
+            if ref.parent.is_external():
+                paths.append(path)
             else:
-                path = ref.path
-
-            if preserve_directory_structure:
-                paths.append(root_path / path)
-            else:
-                paths.append(root_path / Path(path.name))
+                if preserve_directory_structure:
+                    paths.append(root_path / path)
+                else:
+                    paths.append(root_path / Path(path.name))
 
         return paths

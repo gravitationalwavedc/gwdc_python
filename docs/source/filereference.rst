@@ -1,8 +1,8 @@
 FileReference class
 ===================
 
-FileReference objects are used to bundle together the file path, size and download token of a specific job file.
-They are typically automatically created and placed in a FileReferenceList by methods of job classes.
+FileReference objects are used to bundle together the file path, size and download token of a specific file.
+They are typically automatically created and placed in a FileReferenceList by methods of classes inheriting from GWDCObjectBase.
 
 
 .. autoclass:: gwdc_python.files.file_reference.FileReference

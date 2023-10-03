@@ -5,6 +5,8 @@ class GWDCObjectMeta(type):
         new_class = super().__new__(cls, classname, bases, attrs)
         for name, func in attrs.get('FILE_LIST_FILTERS', {}).items():
             new_class.register_file_list_filter(name, func)
+        if 'FILE_LIST_FILTERS' not in attrs:
+            setattr(new_class, 'FILE_LIST_FILTERS', {})
         return new_class
 
     def register_file_list_filter(self, name, file_list_filter_fn):
