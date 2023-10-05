@@ -112,32 +112,6 @@ def test_file_reference_list_types(setup_dicts):
         FileReferenceList(['string'])
 
 
-def test_file_reference_list_output_paths(setup_dicts):
-    file_reference_list = FileReferenceList([FileReference(**file_dict) for file_dict in setup_dicts])
-
-    root_path = Path('test_dir')
-    output_paths = [
-        root_path / 'data/dir/test1.png',
-        root_path / 'data/dir/test2.png',
-        root_path / 'result/dir/test1.txt',
-        root_path / 'result/dir/test2.txt',
-        root_path / 'test1.json',
-        root_path / 'test2.json',
-        'https://myurl.com/test/file1.h5'
-    ]
-    output_paths_flat = [
-        root_path / 'test1.png',
-        root_path / 'test2.png',
-        root_path / 'test1.txt',
-        root_path / 'test2.txt',
-        root_path / 'test1.json',
-        root_path / 'test2.json',
-        'https://myurl.com/test/file1.h5'
-    ]
-    assert output_paths == file_reference_list.get_output_paths(root_path)
-    assert output_paths_flat == file_reference_list.get_output_paths(root_path, preserve_directory_structure=False)
-
-
 def test_batch_file_reference_list(setup_dicts):
     file_reference_list = FileReferenceList([FileReference(**file_dict) for file_dict in setup_dicts])
 

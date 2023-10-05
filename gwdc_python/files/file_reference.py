@@ -112,32 +112,3 @@ class FileReferenceList(TypedList):
             List of GWDCObjectType for each parent of the files in the list
         """
         return [ref.parent.type for ref in self.data]
-
-    def get_output_paths(self, root_path, preserve_directory_structure=True):
-        """Get all the file paths modified to give them a base directory.
-        Can also optionally remove any existing directory structure
-
-        Parameters
-        ----------
-        root_path : str or ~pathlib.Path
-            Directory to add to the beginning of the file paths
-        preserve_directory_structure : bool, optional
-            Retain existing directory structure in the file paths, by default True
-
-        Returns
-        -------
-        list
-            List of output file paths
-        """
-        paths = []
-        for ref in self.data:
-            path = ref.path
-            if ref.parent.is_external():
-                paths.append(path)
-            else:
-                if preserve_directory_structure:
-                    paths.append(root_path / path)
-                else:
-                    paths.append(root_path / Path(path.name))
-
-        return paths

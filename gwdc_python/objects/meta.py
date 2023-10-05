@@ -67,9 +67,9 @@ class GWDCObjectMeta(type):
 
         setattr(self, files_fn_name, files_fn)
 
-        def _save_files(self, root_path, preserve_directory_structure=True):
+        def _save_files(self, root_path):
             file_list = _get_file_list_subset(self)
-            return self.client.save_files_by_reference(file_list, root_path, preserve_directory_structure)
+            return self.client.save_files_by_reference(file_list, root_path)
 
         save_fn_name = f'save_{name}_files'
         save_fn = _save_files
@@ -79,8 +79,6 @@ class GWDCObjectMeta(type):
             ----------
             root_path : str or ~pathlib.Path
                 The base directory into which the files will be saved
-            preserve_directory_structure : bool, optional
-                Save the files in the same structure that they were downloaded in, by default True
         """
 
         setattr(self, save_fn_name, save_fn)
