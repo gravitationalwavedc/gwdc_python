@@ -1,10 +1,12 @@
-class JobMeta(type):
-    """Metaclass for GWDC jobs, which is used to dynamically add methods based on job list filters
+class GWDCObjectMeta(type):
+    """Metaclass for GWDC objects, which is used to dynamically add methods based on file list filters
     """
     def __new__(cls, classname, bases, attrs):
         new_class = super().__new__(cls, classname, bases, attrs)
         for name, func in attrs.get('FILE_LIST_FILTERS', {}).items():
             new_class.register_file_list_filter(name, func)
+        if 'FILE_LIST_FILTERS' not in attrs:
+            setattr(new_class, 'FILE_LIST_FILTERS', {})
         return new_class
 
     def register_file_list_filter(self, name, file_list_filter_fn):
@@ -32,13 +34,15 @@ class JobMeta(type):
 
         file_list_fn_name = f'get_{name}_file_list'
         file_list_fn = _get_file_list_subset
-        file_list_fn.__doc__ = f"""Get information for the {spaced_name} files associated with this job
+        file_list_fn.__doc__ = (
+            f"""Get information for the {spaced_name} files associated with this {self.__class__.__name__}
 
             Returns
             -------
             ~gwdc_python.files._file_reference.FileReferenceList
                 Contains FileReference instances holding information on the {spaced_name} files
-        """
+            """
+        )
 
         setattr(self, file_list_fn_name, file_list_fn)
 
@@ -63,9 +67,9 @@ class JobMeta(type):
 
         setattr(self, files_fn_name, files_fn)
 
-        def _save_files(self, root_path, preserve_directory_structure=True):
+        def _save_files(self, root_path):
             file_list = _get_file_list_subset(self)
-            return self.client.save_files_by_reference(file_list, root_path, preserve_directory_structure)
+            return self.client.save_files_by_reference(file_list, root_path)
 
         save_fn_name = f'save_{name}_files'
         save_fn = _save_files
@@ -75,8 +79,6 @@ class JobMeta(type):
             ----------
             root_path : str or ~pathlib.Path
                 The base directory into which the files will be saved
-            preserve_directory_structure : bool, optional
-                Save the files in the same structure that they were downloaded in, by default True
         """
 
         setattr(self, save_fn_name, save_fn)

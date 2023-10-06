@@ -1,28 +1,31 @@
 import pytest
 from functools import partial
+
+from gwdc_python.objects.base import GWDCObjectBase
+from gwdc_python.files.constants import GWDCObjectType
 from gwdc_python.files.filters import filter_file_list, match_all, custom_path_filter
 from gwdc_python.files.file_reference import FileReference, FileReferenceList
 
 
 @pytest.fixture
-def refs():
+def refs(mocker):
     test_dir = FileReference(
         path='test/name.ext',
         file_size='1',
         download_token='test_token_1',
-        job_id='id'
+        parent=GWDCObjectBase(mocker.Mock(), 'id', GWDCObjectType.NORMAL)
     )
     test_name = FileReference(
         path='dir/test.ext',
         file_size='1',
         download_token='test_token_1',
-        job_id='id'
+        parent=GWDCObjectBase(mocker.Mock(), 'id', GWDCObjectType.NORMAL)
     )
     test_ext = FileReference(
         path='dir/name.test',
         file_size='1',
         download_token='test_token_1',
-        job_id='id'
+        parent=GWDCObjectBase(mocker.Mock(), 'id', GWDCObjectType.NORMAL)
     )
 
     return {

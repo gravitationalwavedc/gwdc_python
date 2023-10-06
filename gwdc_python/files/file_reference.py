@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 from . import filters
-from .constants import JobType
+from ..objects.base import GWDCObjectBase
 from ..utils import remove_path_anchor, TypedList
 
 
@@ -13,11 +13,10 @@ class FileReference:
     path: str
     file_size: int = field(repr=False)
     download_token: str = field(repr=False)
-    job_id: int = field(repr=False)
-    job_type: int = field(repr=False, default=JobType.NORMAL_JOB)
+    parent: GWDCObjectBase = field(repr=False)
 
     def __post_init__(self):
-        if self.job_type != JobType.EXTERNAL_JOB:
+        if not self.parent.is_external():
             self.path = remove_path_anchor(Path(self.path))
             self.file_size = int(self.file_size)
 
@@ -30,9 +29,9 @@ class FileReferenceList(TypedList):
     def batched(self):
         _batched = {}
         for ref in self.data:
-            refs = _batched.get(ref.job_id, FileReferenceList())
+            refs = _batched.get(ref.parent.id, FileReferenceList())
             refs.append(ref)
-            _batched[ref.job_id] = refs
+            _batched[ref.parent.id] = refs
         return _batched
 
     def filter_list(self, file_filter_fn, *args, **kwargs):
@@ -104,43 +103,12 @@ class FileReferenceList(TypedList):
         """
         return [ref.path for ref in self.data]
 
-    def get_job_type(self):
-        """Get the job type for each job in a list
+    def get_parent_type(self):
+        """Get the storage type for each parent in a list
 
         Returns
         -------
         list
-            List of JobType for jobs
+            List of GWDCObjectType for each parent of the files in the list
         """
-        return [ref.job_type for ref in self.data]
-
-    def get_output_paths(self, root_path, preserve_directory_structure=True):
-        """Get all the file paths modified to give them a base directory.
-        Can also optionally remove any existing directory structure
-
-        Parameters
-        ----------
-        root_path : str or ~pathlib.Path
-            Directory to add to the beginning of the file paths
-        preserve_directory_structure : bool, optional
-            Retain existing directory structure in the file paths, by default True
-
-        Returns
-        -------
-        list
-            List of output file paths
-        """
-        paths = []
-        for ref in self.data:
-            if ref.job_type == JobType.EXTERNAL_JOB:
-                # Ignored for external jobs
-                continue
-            else:
-                path = ref.path
-
-            if preserve_directory_structure:
-                paths.append(root_path / path)
-            else:
-                paths.append(root_path / Path(path.name))
-
-        return paths
+        return [ref.parent.type for ref in self.data]
