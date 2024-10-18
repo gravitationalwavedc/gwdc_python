@@ -174,3 +174,51 @@ def test_gwdc_request_no_token(setup_gwdc, requests_mock):
     # Authorization should not have been provided in the headers
     assert "Authorization" not in requests_mock.request_history[0].headers
     assert "X-Correlation-ID" in requests_mock.request_history[0].headers
+
+# Test that requests can accept arbitrary variables
+def test_gwdc_request_variables(setup_gwdc, requests_mock):
+    gwdc = setup_gwdc(
+        auth_responses=[],
+        responses=[request_test_response],
+        token=""
+    )
+
+    response = gwdc.request(
+        query="""
+            query { 
+                testResponse
+            }
+        """
+    )
+
+    assert response["test_response"] == "mock_response"
+
+    response = gwdc.request(
+        query="""
+            query { 
+                testResponse
+            }
+        """,
+        variables = None
+    )
+    assert response["test_response"] == "mock_response"
+
+    response = gwdc.request(
+        query="""
+            query { 
+                testResponse
+            }
+        """,
+        variables = {}
+    )
+    assert response["test_response"] == "mock_response"
+
+    response = gwdc.request(
+        query="""
+            query { 
+                testResponse
+            }
+        """,
+        variables = {"the hat": "the cat"}
+    )
+    assert response["test_response"] == "mock_response"
