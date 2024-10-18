@@ -60,9 +60,12 @@ class GWDC:
         self._refresh_access_token = custom_error_handler(self._refresh_access_token)
         self.request = custom_error_handler(self.request)
 
-    def _request(self, endpoint, query, variables={}, headers=None, method="POST"):
+    def _request(self, endpoint, query, variables=None, headers=None, method="POST"):
         if headers is None:
             headers = {}
+
+        if variables is None:
+            variables = {}
 
         variables = camelize(variables)
         variables, files, files_map = split_variables_dict(variables)
