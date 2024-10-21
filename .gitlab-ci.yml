@@ -1,12 +1,12 @@
 default:
     image:
-      name: ubuntu:20.04
+      name: ubuntu:22.04
       entrypoint: ["/usr/bin/env"]
   
     before_script:
       - apt -y update
       - apt -y install apt-utils
-      - apt -y install net-tools python3.8 python3-pip python3-venv git
+      - apt -y install net-tools python3.10 python3-pip python3-venv git
       - apt -y upgrade
   
   
@@ -58,8 +58,8 @@ black:
   script:
     - apt -y update
     - apt -y install apt-utils
-    - apt -y install net-tools python3.8 python3-venv git curl wget
+    - apt -y install net-tools python3.10 python3-venv git curl wget
     - apt -y upgrade
-    - /usr/bin/python3.8 -m venv /src/venv
+    - /usr/bin/python3.10 -m venv /src/venv
     - /src/venv/bin/pip3 install black
     - /src/venv/bin/black --check gwdc_python/ 
