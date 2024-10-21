@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 def match_file_suffix(file_path, suffix):
-    return file_path.suffix == f'.{suffix}'
+    return file_path.suffix == f".{suffix}"
 
 
 def match_file_base_dir(file_path, directory):
