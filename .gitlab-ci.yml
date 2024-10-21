@@ -54,7 +54,7 @@ flake8:
         codequality: gl-code-quality-report.json
 
 black:
-  stage: CI
+  stage: test
   script:
     - apt -y update
     - apt -y install apt-utils
