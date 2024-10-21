@@ -15,7 +15,7 @@ class GWDCUnknownException(Exception):
 
 
 class GWDCAuthenticationError(Exception):
-    raise_msg = 'APIToken matching query does not exist.'
+    raise_msg = "APIToken matching query does not exist."
 
     def __init__(self):
         super().__init__(self.__class__.raise_msg)
@@ -27,7 +27,7 @@ def handle_request_errors(func):
         try:
             return func(*args, **kwargs)
         except GWDCRequestException as exc:
-            if exc.msg == 'Signature has expired':
+            if exc.msg == "Signature has expired":
                 exc.gwdc._refresh_access_token()
                 return func(*args, **kwargs)
 
@@ -36,4 +36,5 @@ def handle_request_errors(func):
                     raise exception
             else:
                 raise GWDCUnknownException(exc.msg)
+
     return wrapper_handle_exceptions

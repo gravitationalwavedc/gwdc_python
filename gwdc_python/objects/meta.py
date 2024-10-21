@@ -1,12 +1,12 @@
 class GWDCObjectMeta(type):
-    """Metaclass for GWDC objects, which is used to dynamically add methods based on file list filters
-    """
+    """Metaclass for GWDC objects, which is used to dynamically add methods based on file list filters"""
+
     def __new__(cls, classname, bases, attrs):
         new_class = super().__new__(cls, classname, bases, attrs)
-        for name, func in attrs.get('FILE_LIST_FILTERS', {}).items():
+        for name, func in attrs.get("FILE_LIST_FILTERS", {}).items():
             new_class.register_file_list_filter(name, func)
-        if 'FILE_LIST_FILTERS' not in attrs:
-            setattr(new_class, 'FILE_LIST_FILTERS', {})
+        if "FILE_LIST_FILTERS" not in attrs:
+            setattr(new_class, "FILE_LIST_FILTERS", {})
         return new_class
 
     def register_file_list_filter(self, name, file_list_filter_fn):
@@ -26,23 +26,21 @@ class GWDCObjectMeta(type):
         file_list_filter_fn : function
             A function that takes in the full file list and returns only the desired entries from the list
         """
-        spaced_name = name.replace('_', ' ')
+        spaced_name = name.replace("_", " ")
 
         def _get_file_list_subset(self):
             full_list = self.get_full_file_list()
             return full_list.filter_list(file_list_filter_fn)
 
-        file_list_fn_name = f'get_{name}_file_list'
+        file_list_fn_name = f"get_{name}_file_list"
         file_list_fn = _get_file_list_subset
-        file_list_fn.__doc__ = (
-            f"""Get information for the {spaced_name} files associated with this {self.__class__.__name__}
+        file_list_fn.__doc__ = f"""Get information for the {spaced_name} files associated with this {self.__class__.__name__}
 
             Returns
             -------
             ~gwdc_python.files._file_reference.FileReferenceList
                 Contains FileReference instances holding information on the {spaced_name} files
             """
-        )
 
         setattr(self, file_list_fn_name, file_list_fn)
 
@@ -50,7 +48,7 @@ class GWDCObjectMeta(type):
             file_list = _get_file_list_subset(self)
             return self.client.get_files_by_reference(file_list)
 
-        files_fn_name = f'get_{name}_files'
+        files_fn_name = f"get_{name}_files"
         files_fn = _get_files
         files_fn.__doc__ = f"""Download the content of all the {spaced_name} files.
 
@@ -71,7 +69,7 @@ class GWDCObjectMeta(type):
             file_list = _get_file_list_subset(self)
             return self.client.save_files_by_reference(file_list, root_path)
 
-        save_fn_name = f'save_{name}_files'
+        save_fn_name = f"save_{name}_files"
         save_fn = _save_files
         save_fn.__doc__ = f"""Download and save the {spaced_name} files.
 
@@ -83,4 +81,4 @@ class GWDCObjectMeta(type):
 
         setattr(self, save_fn_name, save_fn)
 
-        self.FILE_LIST_FILTERS[f'{name}'] = file_list_filter_fn
+        self.FILE_LIST_FILTERS[f"{name}"] = file_list_filter_fn

@@ -20,7 +20,7 @@ class GWDCObjectBase(metaclass=GWDCObjectMeta):
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return False
-        return (self.id == other.id and self.type == other.type)
+        return self.id == other.id and self.type == other.type
 
     def get_full_file_list(self):
         f"""Get information for all files associated with this {self.__class__.__name__}
@@ -30,7 +30,9 @@ class GWDCObjectBase(metaclass=GWDCObjectMeta):
         ~gwdc_python.files.file_reference.FileReferenceList
             Contains FileReference instances for each of the files associated with this {self.__class__.__name__}
         """
-        return getattr(self.client, f'_get_files_by_{decamelize(self.__class__.__name__)}')(self)
+        return getattr(
+            self.client, f"_get_files_by_{decamelize(self.__class__.__name__)}"
+        )(self)
 
     def is_normal(self):
         f"""Is this a normal {self.__class__.__name__}

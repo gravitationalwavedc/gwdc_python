@@ -17,7 +17,9 @@ class TypedList(UserList):
 
     def _check_type(self, value):
         if not isinstance(value, self.item_type):
-            raise TypeError(f"{self.__class__.__name__}s must contain only {self.item_type.__name__} objects")
+            raise TypeError(
+                f"{self.__class__.__name__}s must contain only {self.item_type.__name__} objects"
+            )
 
     def __add__(self, other):
         self._validate(other)

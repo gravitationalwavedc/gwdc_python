@@ -85,7 +85,10 @@ def rename_dict_keys(input_obj, key_map):
         Copy of `input_obj` with old keys subbed for new keys
     """
     if isinstance(input_obj, dict):  # if dict, apply to each key
-        return {key_map.get(k, k): rename_dict_keys(v, key_map) for k, v in input_obj.items()}
+        return {
+            key_map.get(k, k): rename_dict_keys(v, key_map)
+            for k, v in input_obj.items()
+        }
     elif isinstance(input_obj, list):  # if list, apply to each element
         return [rename_dict_keys(elem, key_map) for elem in input_obj]
     else:

@@ -7,8 +7,7 @@ from ..utils import remove_path_anchor, TypedList
 
 @dataclass
 class FileReference:
-    """Object used to facilitate simpler downloading of files.
-    """
+    """Object used to facilitate simpler downloading of files."""
 
     path: str
     file_size: int = field(repr=False)

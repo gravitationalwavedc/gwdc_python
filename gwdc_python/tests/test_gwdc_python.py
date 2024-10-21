@@ -7,10 +7,7 @@ from gwdc_python.exceptions import GWDCAuthenticationError
 # Set up possible data responses from auth server
 def access_token_response():
     data = {
-        "jwtToken": {
-            "jwtToken": "mock_jwt_token",
-            "refreshToken": "mock_refresh_token"
-        }
+        "jwtToken": {"jwtToken": "mock_jwt_token", "refreshToken": "mock_refresh_token"}
     }
     return {"text": json.dumps({"data": data})}
 
@@ -19,7 +16,7 @@ def refresh_token_response():
     data = {
         "refreshToken": {
             "token": "mock_jwt_token_new",
-            "refreshToken": "mock_refresh_token_new"
+            "refreshToken": "mock_refresh_token_new",
         }
     }
     return {"text": json.dumps({"data": data})}
@@ -33,22 +30,22 @@ def api_token_incorrect():
 
 # Set up possible data responses from Bilby server
 def request_test_response():
-    data = {
-        "testResponse": "mock_response"
-    }
+    data = {"testResponse": "mock_response"}
     return {"text": json.dumps({"data": data})}
 
 
 # Set up possible error responses from Bilby server
 def access_token_expired():
-    errors = [{"message": 'Signature has expired'}]
+    errors = [{"message": "Signature has expired"}]
     return {"text": json.dumps({"errors": errors})}
 
 
 # Set up GWDC class with specified responses
 @pytest.fixture
 def setup_gwdc(requests_mock):
-    def _setup_gwdc(auth_responses=None, responses=None, error_handler=None, token='mock_token'):
+    def _setup_gwdc(
+        auth_responses=None, responses=None, error_handler=None, token="mock_token"
+    ):
         if responses is None:
             responses = []
 
@@ -57,39 +54,34 @@ def setup_gwdc(requests_mock):
 
         auth_response_list = [response() for response in auth_responses]
         response_list = [response() for response in responses]
-        requests_mock.post('https://gwcloud.org.au/auth/graphql', auth_response_list)
-        requests_mock.post('https://gwcloud.org.au/bilby/graphql', response_list)
+        requests_mock.post("https://gwcloud.org.au/auth/graphql", auth_response_list)
+        requests_mock.post("https://gwcloud.org.au/bilby/graphql", response_list)
         return GWDC(
             token=token,
-            auth_endpoint='https://gwcloud.org.au/auth/graphql',
-            endpoint='https://gwcloud.org.au/bilby/graphql',
-            custom_error_handler=error_handler
+            auth_endpoint="https://gwcloud.org.au/auth/graphql",
+            endpoint="https://gwcloud.org.au/bilby/graphql",
+            custom_error_handler=error_handler,
         )
+
     return _setup_gwdc
 
 
 # Test that GWDC will raise an GWDCAuthenticationError if the API Token cannot be found in the auth database
 def test_gwdc_api_token(setup_gwdc):
     with pytest.raises(GWDCAuthenticationError):
-        setup_gwdc(
-            auth_responses=[api_token_incorrect]
-        )
+        setup_gwdc(auth_responses=[api_token_incorrect])
 
 
 # Test GWDC setup, obtaining initial access token
 def test_gwdc_init(setup_gwdc):
-    gwdc = setup_gwdc(
-        auth_responses=[access_token_response]
-    )
+    gwdc = setup_gwdc(auth_responses=[access_token_response])
     assert gwdc.jwt_token == "mock_jwt_token"
     assert gwdc.refresh_token == "mock_refresh_token"
 
 
 # Test that refreshing token works
 def test_gwdc_refresh(setup_gwdc):
-    gwdc = setup_gwdc(
-        auth_responses=[access_token_response, refresh_token_response]
-    )
+    gwdc = setup_gwdc(auth_responses=[access_token_response, refresh_token_response])
     gwdc._refresh_access_token()
     assert gwdc.jwt_token == "mock_jwt_token_new"
     assert gwdc.refresh_token == "mock_refresh_token_new"
@@ -99,7 +91,7 @@ def test_gwdc_refresh(setup_gwdc):
 def test_gwdc_request(setup_gwdc, requests_mock):
     gwdc = setup_gwdc(
         auth_responses=[access_token_response, refresh_token_response],
-        responses=[access_token_expired, request_test_response]
+        responses=[access_token_expired, request_test_response],
     )
     assert gwdc.jwt_token == "mock_jwt_token"
     assert gwdc.refresh_token == "mock_refresh_token"
@@ -130,23 +122,19 @@ def test_gwdc_custom_error_handling_token(setup_gwdc):
                 f(*args, **kwargs)
             except GWDCAuthenticationError:
                 raise TestException
+
         return wrapper
 
     with pytest.raises(TestException):
         setup_gwdc(
-            auth_responses=[api_token_incorrect],
-            error_handler=custom_error_handler
+            auth_responses=[api_token_incorrect], error_handler=custom_error_handler
         )
 
 
 # Test that creating an instance without a token works
 def test_gwdc_no_token(setup_gwdc, requests_mock):
     try:
-        setup_gwdc(
-            auth_responses=[],
-            responses=[],
-            token=""
-        )
+        setup_gwdc(auth_responses=[], responses=[], token="")
     except json.decoder.JSONDecodeError:
         pytest.fail("Unexpected error when creating GWDC without a token")
 
@@ -155,11 +143,7 @@ def test_gwdc_no_token(setup_gwdc, requests_mock):
 
 # Test that requests still work correctly without providing a token
 def test_gwdc_request_no_token(setup_gwdc, requests_mock):
-    gwdc = setup_gwdc(
-        auth_responses=[],
-        responses=[request_test_response],
-        token=""
-    )
+    gwdc = setup_gwdc(auth_responses=[], responses=[request_test_response], token="")
 
     response = gwdc.request(
         query="""
@@ -175,13 +159,10 @@ def test_gwdc_request_no_token(setup_gwdc, requests_mock):
     assert "Authorization" not in requests_mock.request_history[0].headers
     assert "X-Correlation-ID" in requests_mock.request_history[0].headers
 
+
 # Test that requests can accept arbitrary variables
 def test_gwdc_request_variables(setup_gwdc, requests_mock):
-    gwdc = setup_gwdc(
-        auth_responses=[],
-        responses=[request_test_response],
-        token=""
-    )
+    gwdc = setup_gwdc(auth_responses=[], responses=[request_test_response], token="")
 
     response = gwdc.request(
         query="""
@@ -199,7 +180,7 @@ def test_gwdc_request_variables(setup_gwdc, requests_mock):
                 testResponse
             }
         """,
-        variables = None
+        variables=None,
     )
     assert response["test_response"] == "mock_response"
 
@@ -209,7 +190,7 @@ def test_gwdc_request_variables(setup_gwdc, requests_mock):
                 testResponse
             }
         """,
-        variables = {}
+        variables={},
     )
     assert response["test_response"] == "mock_response"
 
@@ -219,6 +200,6 @@ def test_gwdc_request_variables(setup_gwdc, requests_mock):
                 testResponse
             }
         """,
-        variables = {"the hat": "the cat"}
+        variables={"the hat": "the cat"},
     )
     assert response["test_response"] == "mock_response"

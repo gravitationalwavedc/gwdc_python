@@ -52,4 +52,14 @@ flake8:
     artifacts:
       reports:
         codequality: gl-code-quality-report.json
-  
+
+black:
+  stage: CI
+  script:
+    - apt -y update
+    - apt -y install apt-utils
+    - apt -y install net-tools python3.8 python3-venv git curl wget
+    - apt -y upgrade
+    - /usr/bin/python3.8 -m venv /src/venv
+    - /src/venv/bin/pip3 install black
+    - /src/venv/bin/black --check gwdc_python/ 

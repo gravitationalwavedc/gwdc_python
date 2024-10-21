@@ -9,7 +9,7 @@ repository = "https://github.com/gravitationalwavedc/gwdc_python"
 include = ["LICENSE",]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.9"
 requests = "^2.25.1"
 jwt = "^1.2.0"
 requests-toolbelt = "^0.9.1"
@@ -32,6 +32,9 @@ flake8 = "^3.9.2"
 coverage = "^5.5"
 pytest-cov = "^2.12.1"
 pytest-mock = "^3.7.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
