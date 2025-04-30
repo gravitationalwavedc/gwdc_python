@@ -1,12 +1,12 @@
 default:
     image:
-      name: ubuntu:22.04
+      name: python:3.7
       entrypoint: ["/usr/bin/env"]
   
     before_script:
       - apt -y update
       - apt -y install apt-utils
-      - apt -y install net-tools python3.10 python3-pip python3-venv git
+      - apt -y install net-tools python3-pip python3-venv git curl wget
       - apt -y upgrade
   
   
@@ -47,7 +47,7 @@ code-quality:
   
 flake8:
     script:
-      - pip3 install flake8-gl-codeclimate
+      - pip3 install flake8
       - flake8 --exit-zero --format gl-codeclimate --output-file gl-code-quality-report.json
     artifacts:
       reports:
@@ -56,10 +56,6 @@ flake8:
 black:
   stage: test
   script:
-    - apt -y update
-    - apt -y install apt-utils
-    - apt -y install net-tools python3.10 python3-venv git curl wget
-    - apt -y upgrade
-    - /usr/bin/python3.10 -m venv /src/venv
+    - python3 -m venv /src/venv
     - /src/venv/bin/pip3 install black
-    - /src/venv/bin/black --check gwdc_python/ 
+    - /src/venv/bin/black --check gwdc_python/

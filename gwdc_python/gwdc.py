@@ -12,7 +12,10 @@ from requests_toolbelt.multipart.encoder import (
 from tqdm import tqdm
 
 from .constants import APP_NAME, ORGANISATION
-from .exceptions import GWDCRequestException, handle_request_errors
+from .exceptions import (
+    GWDCAuthenticationError,
+    GWDCUnknownException,
+)
 from .logger import create_logger
 from .utils import split_variables_dict
 
@@ -20,15 +23,13 @@ logger = create_logger(__name__)
 
 
 class GWDC:
-    def __init__(self, token, auth_endpoint, endpoint, custom_error_handler=None):
+    def __init__(self, token, endpoint, custom_error_handler=None):
         self.api_token = token
-        self.auth_endpoint = auth_endpoint
         self.endpoint = endpoint
         if custom_error_handler:
             self._apply_custom_error_handler(custom_error_handler)
-
         if self.api_token:
-            self._obtain_access_token()
+            self._check_api_token()
         else:
             self.public_id = self._obtain_public_id()
             self.session_id = self._obtain_session_id()
@@ -56,10 +57,25 @@ class GWDC:
             write_new_config()
             return json.loads(config_file.read_text())["public_id"]
 
+    def _check_api_token(self):
+        resp = self.request(
+            query="""query {
+    sessionUser {
+        isAuthenticated
+    }
+}"""
+        )
+
+        if resp.get("session_user", None) and resp["session_user"].get(
+            "is_authenticated", None
+        ):
+            return
+        raise GWDCAuthenticationError
+
     def _apply_custom_error_handler(self, custom_error_handler):
-        self._obtain_access_token = custom_error_handler(self._obtain_access_token)
-        self._refresh_access_token = custom_error_handler(self._refresh_access_token)
         self.request = custom_error_handler(self.request)
+        # Also has to wrap _check_api_token in order to catch authentication errors
+        self._check_api_token = custom_error_handler(self._check_api_token)
 
     def _request(self, endpoint, query, variables=None, headers=None, method="POST"):
         if headers is None:
@@ -118,49 +134,13 @@ class GWDC:
         if not errors:
             return decamelize(content.get("data", None))
         else:
-            raise GWDCRequestException(gwdc=self, msg=errors[0].get("message"))
+            raise GWDCUnknownException(errors[0].get("message"))
 
-    @handle_request_errors
-    def _obtain_access_token(self):
-        data = self._request(
-            endpoint=self.auth_endpoint,
-            query="""
-                query ($token: String!){
-                    jwtToken (token: $token) {
-                        jwtToken
-                        refreshToken
-                    }
-                }
-            """,
-            variables={"token": self.api_token},
-        )
-        self.jwt_token = data["jwt_token"]["jwt_token"]
-        self.refresh_token = data["jwt_token"]["refresh_token"]
-
-    @handle_request_errors
-    def _refresh_access_token(self):
-        data = self._request(
-            endpoint=self.auth_endpoint,
-            query="""
-                mutation RefreshToken ($refreshToken: String!){
-                    refreshToken (refreshToken: $refreshToken) {
-                        token
-                        refreshToken
-                    }
-                }
-            """,
-            variables={"refresh_token": self.refresh_token},
-        )
-        self.jwt_token = data["refresh_token"]["token"]
-        self.refresh_token = data["refresh_token"]["refresh_token"]
-
-    @handle_request_errors
     def request(self, query, variables=None, headers=None, authorize=True):
-
         all_headers = {}
         if authorize:
             if self.api_token:
-                all_headers = {"Authorization": "JWT " + self.jwt_token}
+                all_headers = {"Authorization": self.api_token}
             elif self.public_id:
                 all_headers = {
                     "X-Correlation-ID": f"{self.public_id} {self.session_id}"
