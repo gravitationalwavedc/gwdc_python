@@ -58,11 +58,13 @@ class GWDC:
             return json.loads(config_file.read_text())["public_id"]
 
     def _check_api_token(self):
-        resp = self.request(query="""query {
+        resp = self.request(
+            query="""query {
     sessionUser {
         isAuthenticated
     }
-}""")
+}"""
+        )
 
         if resp.get("session_user", None) and resp["session_user"].get(
             "is_authenticated", None

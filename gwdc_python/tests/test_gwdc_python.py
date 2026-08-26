@@ -85,11 +85,13 @@ def test_gwdc_no_token(setup_gwdc, requests_mock):
 def test_gwdc_request_no_token(setup_gwdc, requests_mock):
     gwdc = setup_gwdc(responses=[request_test_response], token="")
 
-    response = gwdc.request(query="""
+    response = gwdc.request(
+        query="""
             query {
                 testResponse
             }
-        """)
+        """
+    )
 
     assert response["test_response"] == "mock_response"
 
@@ -102,11 +104,13 @@ def test_gwdc_request_no_token(setup_gwdc, requests_mock):
 def test_gwdc_request_variables(setup_gwdc, requests_mock):
     gwdc = setup_gwdc(responses=[request_test_response], token="")
 
-    response = gwdc.request(query="""
+    response = gwdc.request(
+        query="""
             query { 
                 testResponse
             }
-        """)
+        """
+    )
 
     assert response["test_response"] == "mock_response"
 
@@ -190,11 +194,13 @@ def test_request_raises_with_extensions(setup_gwdc):
     )
 
     with pytest.raises(GWDCUnknownException) as excinfo:
-        gwdc.request(query="""
+        gwdc.request(
+            query="""
                 query {
                     testResponse
                 }
-            """)
+            """
+        )
 
     assert excinfo.value.extensions["missing_files"] == ["/a", "/b"]
 
@@ -204,10 +210,12 @@ def test_request_raises_without_extensions(setup_gwdc):
     gwdc = setup_gwdc(responses=[error_response()], token="")
 
     with pytest.raises(GWDCUnknownException) as excinfo:
-        gwdc.request(query="""
+        gwdc.request(
+            query="""
                 query {
                     testResponse
                 }
-            """)
+            """
+        )
 
     assert excinfo.value.extensions is None
