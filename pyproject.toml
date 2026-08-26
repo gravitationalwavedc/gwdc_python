@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gwdc-python"
-version = "1.0.0"
+version = "1.0.1"
 description = "API for GWDC modules"
 authors = ["Thomas Reichardt <treichardt@swin.edu.au>", "Owen Cole <ocole@swin.edu.au>", "Lewis Lakerink <llakerink@swin.edu.au>"]
 license = "MIT"
