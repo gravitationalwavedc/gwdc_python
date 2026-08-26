@@ -2,8 +2,9 @@ import functools
 
 
 class GWDCUnknownException(Exception):
-    def __init__(self, msg):
+    def __init__(self, msg, extensions=None):
         self.msg = msg
+        self.extensions = extensions
         super().__init__(self.msg)
 
 

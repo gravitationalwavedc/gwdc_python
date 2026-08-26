@@ -134,7 +134,9 @@ class GWDC:
         if not errors:
             return decamelize(content.get("data", None))
         else:
-            raise GWDCUnknownException(errors[0].get("message"))
+            raise GWDCUnknownException(
+                errors[0].get("message"), extensions=errors[0].get("extensions")
+            )
 
     def request(self, query, variables=None, headers=None, authorize=True):
         all_headers = {}
